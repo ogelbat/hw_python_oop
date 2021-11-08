@@ -1,19 +1,15 @@
 from dataclasses import dataclass
 
 
+@dataclass
 class InfoMessage:
     """Информационное сообщение о тренировке."""
 
-    def __init__(self, training_type: str,
-                 duration: float,
-                 distance: float,
-                 speed: float,
-                 calories: float) -> None:
-        self.training_type = training_type
-        self.duration = duration
-        self.distance = distance
-        self.speed = speed
-        self.calories = calories
+    training_type: str  # Тип тренировки
+    duration: float  # Длительность
+    distance: float  # Дистанция
+    speed: float  # Ср. скорость
+    calories: float  # Потрачено ккал
 
     def get_message(self) -> str:
         temp = (f'Тип тренировки: {self.training_type};' +
@@ -24,8 +20,13 @@ class InfoMessage:
         return temp
 
 
+@dataclass
 class Training:
     """Базовый класс тренировки."""
+
+    action: int  # шаг - бег, ходьба; гребок - плавание.
+    duration: float  # длительность тренировки.
+    weight: float  # вес спортсмена.
 
     LEN_STEP = 0.65  # расстояние, которое преодалевает спортсмен.
     M_IN_KM = 1000  # константа перевода метров в километры.
@@ -35,15 +36,6 @@ class Training:
     coeff_calorie_4 = 0.029
     coeff_calorie_6 = 1.1
     coeff_calorie_7 = 2
-
-    def __init__(self,
-                 action: int,
-                 duration: float,
-                 weight: float,
-                 ) -> None:
-        self.action = action  # шаг - бег, ходьба; гребок - плавание.
-        self.duration = duration  # длительность тренировки.
-        self.weight = weight  # вес спортсмена.
 
     def get_distance(self) -> float:
         """Получить дистанцию в км."""
@@ -60,7 +52,6 @@ class Training:
 
     def show_training_info(self) -> InfoMessage:
         """Вернуть информационное сообщение о выполненной тренировке."""
-
         return InfoMessage(self.__class__.__name__,
                            self.duration,
                            self.get_distance(),
@@ -78,17 +69,11 @@ class Running(Training):
         return temp2 * self.weight / self.M_IN_KM * self.duration * 60
 
 
+@dataclass
 class SportsWalking(Training):
     """Тренировка: спортивная ходьба."""
 
-    def __init__(self,
-                 action: int,
-                 duration: float,
-                 weight: float,
-                 height: float
-                 ) -> None:
-        super().__init__(action, duration, weight)
-        self.height = height
+    height: float  # Рост спортсмена
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
@@ -98,21 +83,14 @@ class SportsWalking(Training):
         return temp * self.duration * 60
 
 
+@dataclass
 class Swimming(Training):
     """Тренировка: плавание."""
 
-    LEN_STEP = 1.38
+    length_pool: float  # длина бассейна
+    count_pool: float  # количество проплытых бассейнов
 
-    def __init__(self,
-                 action: int,
-                 duration: float,
-                 weight: float,
-                 length_pool: float,
-                 count_pool: float
-                 ) -> None:
-        super().__init__(action, duration, weight)
-        self.length_pool = length_pool  # длина бассейна
-        self.count_pool = count_pool  # количество проплытых бассейнов
+    LEN_STEP = 1.38
 
     def get_mean_speed(self):
         """Метод возвращает значение средней
@@ -129,14 +107,17 @@ class Swimming(Training):
 def read_package(workout_type: str, data: list) -> Training:
     """Прочитать данные полученные от датчиков."""
 
-    if workout_type == 'SWM':
-        return Swimming(*data)
+    dict_class = {'SWM': (Swimming, 5),
+                  'RUN': (Running, 3),
+                  'WLK': (SportsWalking, 4)}
 
-    if workout_type == 'RUN':
-        return Running(*data)
-
-    if workout_type == 'WLK':
-        return SportsWalking(*data)
+    if workout_type in dict_class:  # Проверяем соответствие типа тренеровки и
+        if len(data) == dict_class[workout_type][1]:  # размер пакета данных
+            return dict_class[workout_type][0](*data)
+        else:
+            raise ValueError('Ошибка размера пакета данных')
+    else:
+        raise TypeError('Неизвестный тип тренировки')
 
 
 def main(training: Training) -> None:
