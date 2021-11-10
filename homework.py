@@ -1,7 +1,5 @@
 from dataclasses import dataclass
-from typing import Union
-from typing import List
-from typing import ClassVar
+from typing import ClassVar, Union, List
 
 
 @dataclass
@@ -34,6 +32,7 @@ class Training:
     M_IN_KM: ClassVar[int] = 1000  # константа перевода метров в километры.
     coeff_calorie_1: ClassVar[Union[int, float]] = 18  # Коэф-т для расчета
     coeff_calorie_2: ClassVar[Union[int, float]] = 20  # Коэф-т для расчета
+    coeff_calorie_3: ClassVar[Union[int, float]] = 60  # Коэф-т для расчета
 
     def get_distance(self) -> float:
         """Получить дистанцию в км."""
@@ -67,7 +66,8 @@ class Running(Training):
                 - self.coeff_calorie_2)
                 * self.weight
                 / self.M_IN_KM
-                * self.duration * 60)
+                * self.duration
+                * self.coeff_calorie_3)
 
 
 @dataclass
@@ -84,7 +84,7 @@ class SportsWalking(Training):
         return ((self.get_mean_speed() ** 2 // self.height
                 * self.coeff_calorie_2 * self.weight
                 + self.coeff_calorie_1 * self.weight)
-                * self.duration * 60)
+                * self.duration * self.coeff_calorie_3)
 
 
 @dataclass
