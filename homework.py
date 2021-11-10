@@ -98,7 +98,6 @@ class Swimming(Training):
     coeff_calorie_1: ClassVar[Union[int, float]] = 1.1  # Коэф-т для расчета
     coeff_calorie_2: ClassVar[Union[int, float]] = 2  # Коэф-т для расчета
 
-
     def get_mean_speed(self):
         """Метод возвращает значение средней
         скорости движения во время тренировки"""
